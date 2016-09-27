@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<smrtpipeSettings>
+    <protocol version="2.3.0" id="RS_ReadsOfInsert.1" editable="false">
+        <param name="name" label="Protocol Name">
+            <value>RS_ReadsOfInsert</value>
+            <input type="text"/>
+            <rule required="true"/>
+        </param>
+        <param name="description">
+            <value>Generates single-molecule consensus reads from the insert template, filters output by quality and length, and optionally splits by barcode. Output in FASTA and cmp.h5 format.
+      </value>
+            <textarea></textarea>
+        </param>
+        <param name="version" hidden="true">
+            <value>1</value>
+            <input type="text"/>
+            <rule type="digits" required="true" min="1.0"/>
+        </param>
+        <param name="state" hidden="true">
+            <value>active</value>
+            <input value="active" type="radio"/>
+            <input value="inactive" type="radio"/>
+        </param>
+        <param name="control" hidden="true">
+            <value>/home/data/pacbio/smrtanalysis_userdata/references/2kb_control</value>
+        </param>
+        <param name="fetch" hidden="true">
+            <value>common/protocols/preprocessing/Fetch.1.xml</value>
+        </param>
+        <param name="Filtering">
+            <value>common/protocols/consensus/ReadsOfInsert.1.xml</value>
+            <select multiple="true">
+                <import extension="xml" contentType="text/directory">common/protocols/consensus</import>
+            </select>
+        </param>
+        <param name="barcode" editableInJob="true">
+            <value>common/protocols/barcode/Barcode.1.xml</value>
+            <select multiple="false">
+                <import extension="xml" contentType="text/directory">common/protocols/barcode</import>
+            </select>
+        </param>
+    </protocol>
+    <moduleStage name="fetch" editable="true">
+        <module label="Fetch v1" id="P_Fetch" editableInJob="true">
+            <description>Sets up inputs</description>
+        </module>
+    </moduleStage>
+    <moduleStage name="Filtering" editable="true">
+        <module label="Reads Of Insert" id="P_CCS" editableInJob="true">
+            <description>Generates consensus sequences from single molecules.</description>
+            <param name="minFullPasses" label="Minimum Full Passes">
+                <value>NUM_FULL_PASSES</value>
+                <title>The minimum number of full-length passes over the insert DNA for the read to be included.</title>
+                <input type="text"/>
+                <rule type="digits" min="0.0" message="Value must be an integer between 0 and 10" max="10.0"/>
+            </param>
+            <param name="minPredictedAccuracy" label="Minimum Predicted Accuracy">
+                <value>PERCENT_PRED_ACCURACY</value>
+                <title>The minimum predicted accuracy (in %) of the Reads of Insert emitted.</title>
+                <input type="text"/>
+                <rule type="digits" min="70.0" message="Value must be between 70 and 100" max="100.0"/>
+            </param>
+            <param name="minLength" label="Minimum Read Length of Insert (in bases)">
+                <title>The Minimum Read Length of Insert (in bases). Default: No Minimum Length
+      </title>
+                <input type="text"/>
+                <rule type="digits" min="1.0" message="Value must be greater than 0"/>
+            </param>
+            <param name="maxLength" label="Maximum Read Length of Insert (in bases)">
+                <title>The Maximum Read Length of Insert (in bases). Default: No Limit</title>
+                <input type="text"/>
+                <rule type="digits" min="1.0" message="Value must be greater than 0"/>
+            </param>
+        </module>
+    </moduleStage>
+    <moduleStage name="barcode" editable="true">
+        <module label="Barcode Module v1" id="P_Barcode" editableInJob="true">
+            <param name="mode" label="My library has DNA barcodes that are:">
+                <value>paired</value>
+                <title>Select whether the sample barcodes are the same on each end of the library template, or different on each end.</title>
+                <select>
+                    <option optValue="paired">Different on each end (paired)</option>
+                    <option optValue="symmetric">The same on both ends (symmetric)</option>
+                </select>
+            </param>
+            <param name="barcode.fasta" label="Barcode FASTA File">
+                <value>BARCODE_FASTA_DIR</value>
+                <title>The path to the FASTA file containing the barcodes to use.</title>
+                <input type="text"/>
+            </param>
+            <param name="score" label="Minimum barcode score">
+                <value>22</value>
+                <title>The minimum score for calling a barcode. This must be between 0 and 2 times the length of the barcode. </title>
+                <input type="text"/>
+                <rule type="number" min="0.0" message="Score threshold for calling barcodes. Value must be between 0 and twice the length of the barcode in bases." max="1000000.0"/>
+            </param>
+        </module>
+    </moduleStage>
+    <fileName>settings.xml</fileName>
+</smrtpipeSettings>
