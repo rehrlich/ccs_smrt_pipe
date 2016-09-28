@@ -1,49 +1,56 @@
 Required software:
-Smrtanalysis version ?
-python 3.5.0 and pandas
+Smrtanalysis version 2.3
 
-Installing python:
 
-The easy way to install python is to use Anaconda.  This will download a lot of things you don't need right now.  Go to https://www.continuum.io/downloads and follow the instructions for pythonn 3.5 for linux.
+Installation:
+Modify the line:
+SMRT_ROOT="/opt/smrtanalysis"
+in the file ccs_job_maker.sh so instead of /opt/smrtanalysis it has the location of smrtanalysis on your computer.  If you type ls and this location you should see something like:
+admin  common  current  install  smrtcmds  tmpdir  userdata
+If you can't find it, ask the person who installed smrtanalysis where it is.
+Optional:  Modify the header on ccs_job_maker.sh so you can submit it to sge.
 
-The slightly more difficult way is to use Miniconda which is like Anaconda but doesn't include the stuff you don't need.  Go to http://conda.pydata.org/miniconda.html and follow the instructions for pythonn 3.5 for linux.  After installing go to the command line and type:
-conda install pandas
-
-If you don't want another package manager and just want python you can download it at https://www.python.org/downloads.  Install pandas by typing:
-pip install pandas
-It has some dependencies.  pip install should help with that.
 
 Creating the barcode fasta file:
-The set of barcodes you purchased should have a .fasta file with their sequences.  Several can be found here:  https://github.com/PacificBiosciences/Bioinformatics-Training/tree/master/barcoding
-The order of the barcodes doesn't matter.
+The set of barcodes you purchased should have a fasta file with their sequences.  Several can be found here:  https://github.com/PacificBiosciences/Bioinformatics-Training/tree/master/barcoding
+The order of the barcodes in this file doesn't matter.  Extra barcodes are also fine.
 
 Single sample mode:
 This is intended to be used for debugging and testing parameters in a bash loop.  You should generally use the multi sample mode because it is more efficient when you have multiple samples per cell.
-This takes several command line inputs (described below) and runs a SMRT pipe circular consensus sequencing (ccs) job to create a consensus fastq file.  This fastq can be used as an input file for TODO: name the pipeline.
+This takes several command line inputs (described below) and runs a SMRT pipe circular consensus sequencing (ccs) job to create a consensus fastq file.  This fastq can be used as an input file for MCSMRT.
 
 Multi sample mode:
 This runs many SMRT pipe ccs jobs.  Jobs are defined by a csv file.  The header line of the file is:  TODO: figure out all parameters
 Each line in the file is one sample and each column is a parameter for a ccs job.  All of the parameters work the same as the single sample parameters except for job name.  When multiple samples from the same SMRT cell can be demultiplexed using the same parameters, they can be given the same job name.  Otherwise, all job names must be unique.  Lines with the same job name must contain the same values for all parameters except for name, barcode1 and barcode2.
-All barcodes for a single job name should be unique.  For example, if job1 has sample A with barcode b1=x1 and b2=x2 then sample B from job1 cannot have x1 for either of its barcodes.  A different job, job can have barcode b1=x1 and b2=x2.
-All sample names must be unique for their outdir.  TODO: decide if multiple outdirs are allowed
+All barcodes for a single job name should be unique.  For example, if job1 has sample A with barcode b1=x1 and b2=x2 then sample B from job1 cannot have x1 for either of its barcodes.  A different job can have a sample with barcode b1=x1 and b2=x2.
+All sample names must be unique for their outdir.  TODO: decide if multiple outdirs are allowed - no because each outdir should be a project and you should use different input files for different projects
 
 Steps:
-Inputs are divided by job name
-Checks are done for each job to be sure that all parameters match except for name, barcode1 and barcode2
-Values are checked:
-SMRT_ROOT/current/etc/setup.sh exists
-OUTDIR doesn't exist (this simplifies error checking)
-0 <= FULL_PASSES <= 10
-70 <= pred acc <= 100
-video path exists and has at least one bax.h5 file
-barcode file looks like a fasta file
-b1 and b2 are headers in the bcf
-check paths for spaces
-Directories are created
-Barcode reference files are uploaded
-inputs.xml and settings.xml are created
-ccs jobs are run
-ccs passes are counted and added to headers
+A bash script checks that SMRT_ROOT/current/etc/setup.sh exists and sources it.
+Bash script calls python script which does all command line parsing.
+Since SMRT_ROOT/current/etc/setup.sh uses python 2.7.3, so does this script.
+
+Batch mode:
+    Inputs are divided by job name
+Single sample mode:
+    Inputs are treated as a single batch job
+
+Both modes:
+    Checks are done for each job to be sure that all parameters match except for name, barcode1 and barcode2
+    Values are checked:
+        OUTDIR doesn't exist (this simplifies error checking)
+        0 <= FULL_PASSES <= 10
+        70 <= pred acc <= 100
+        video path exists and has at least one bax.h5 file - needs a helpful error message if path only has bam files
+        barcode file looks like a fasta file
+        b1 and b2 are headers in the bcf
+        check paths for spaces
+
+    Directories are created
+    Barcode reference files are uploaded
+    inputs.xml and settings.xml are created
+    ccs jobs are run
+    ccs passes are counted and added to headers
 
 
 
@@ -75,9 +82,6 @@ Required arguments:
   -bcf BARCODE_FILE, --barcode_file BARCODE_FILE
                         The path to the fasta file with the barcodes (default:
                         None)
-  -s SMRT_ROOT, --smrt_root SMRT_ROOT
-                        The installation directory for SMRT analysis (default:
-                        None)
   -v VIDEO_PATH, --video_path VIDEO_PATH
                         The directory containing the *.bax.h5 files (default:
                         None)
@@ -94,9 +98,6 @@ FULL_PASSES - PacBio describes this as "The minimum number of full-length passes
 PRED_ACCURACY - PacBio describes this as "The minimum predicted accuracy (in %) of the Reads of Insert emitted."  It must be a whole number between 70 and 100, inclusive.
 BARCODE_MODE - This specifies the type of barcoding used so that barcodes can be scored correctly.  The argument is symmetric if the barcode sequences are the same on both sides of the insert and asymmetric if they are different.
 BARCODE_FILE - This is the path to a fasta file with the barcodes used for the experiment.
-SMRT_ROOT - This is the location where smrtanalysis was installed on your computer.  If you type ls and this location you should see something like:
-admin  common  current  install  smrtcmds  tmpdir  userdata
-If you can't find it, ask the person who installed smrtanalysis where it is.
 RUN_PATH - A directory containing the *.bax.h5 data files.  In the directory with the raw data from a pacbio cell, this the Analysis_Results folder.  All *.bax.h5 files in the directory will be used.  On my computer this path would be something like /data/pacbio/rawdata/run_name/A01_1/Analysis_Results
 BARCODE - b1 and b2 must be valid fasta headers from the barcode fasta file.
 
