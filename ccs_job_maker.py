@@ -9,32 +9,41 @@ def make_args():
     parser = argparse.ArgumentParser(description='Create SMRT pipe ccs jobs',
                                      add_help=True,
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-o', '--outdir',
-                        help='output directory',
-                        default=os.getcwd() + '/smrt_pipe_ccs')
-    parser.add_argument('-n', '--name',
-                        help='A name for the fastq output file',
-                        default='Sample1')
-    parser.add_argument('-fp', '--full_passes',
-                        help='The minimum number of full passes which must be an integer between zero and ten',
-                        type=int,
-                        default=3)
-    parser.add_argument('-pa', '--pred_accuracy',
-                        help='Minimum prediction accuracy which must be an integer between 70 and 100',
-                        type=int,
-                        default=90)
-    parser.add_argument('-bcm', '--barcode_mode',
-                                help='must be either "asymmetric" or "symmetric"',
-                                choices=['asymmetric', 'symmetric'],
-                                default='asymmetric')
 
-    required_flags = parser.add_argument_group('Required arguments')
+    subparsers = parser.add_subparsers(help='sub-command help')
+
+    batch_parser = subparsers.add_parser('batch', help='batch input help')
+    required_flags_batch = batch_parser.add_argument_group('Required arguments')
+    required_flags_batch.add_argument('-i', '--input_file',
+                                      help='batch input file',
+                                      required=True)
+
+    single_parser = subparsers.add_parser('single', help='single input help',
+                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+
+    single_parser.add_argument('-o', '--outdir',
+                               help='output directory',
+                               default=os.getcwd() + '/smrt_pipe_ccs')
+    single_parser.add_argument('-n', '--name',
+                               help='A name for the fastq output file',
+                               default='Sample1')
+    single_parser.add_argument('-fp', '--full_passes',
+                               help='The minimum number of full passes which must be an integer between zero and ten',
+                               type=int,
+                               default=3)
+    single_parser.add_argument('-pa', '--pred_accuracy',
+                               help='Minimum prediction accuracy which must be an integer between 70 and 100',
+                               type=int,
+                               default=90)
+    single_parser.add_argument('-bcm', '--barcode_mode',
+                               help='must be either "asymmetric" or "symmetric"',
+                               choices=['asymmetric', 'symmetric'],
+                               default='asymmetric')
+
+    required_flags = single_parser.add_argument_group('Required arguments')
 
     required_flags.add_argument('-bcf', '--barcode_file',
                                 help='The path to the fasta file with the barcodes',
-                                required=True)
-    required_flags.add_argument('-s', '--smrt_root',
-                                help='The installation directory for SMRT analysis',
                                 required=True)
     required_flags.add_argument('-v', '--video_path',
                                 help='The directory containing the *.bax.h5 files',
@@ -45,6 +54,7 @@ def make_args():
     required_flags.add_argument('-b2', '--barcode2',
                                 help='The reverse barcode name',
                                 required=True)
+
     return parser.parse_args()
 
 
@@ -58,9 +68,41 @@ def verify_args(args):
     sys.exit()
 
 
+class CCSSettings:
+    _script_dir = os.path.dirname(os.path.abspath(__file__))
+    _settings_template = _script_dir + '/settings_template.xml'
+
+    def __init__(self, full_passes, pred_accuracy, barcode_file,
+                 settings_output):
+
+        self._full_passes = full_passes
+        self._pred_accuracy = pred_accuracy
+        self._barcode_file = barcode_file
+        self.settings_output = settings_output
+
+    def _check_parameters(self):
+        if not 0 <= self._full_passes <= 10:
+            print('Full passes must be an integer between zero and 10.')
+        if not 70 <= self._pred_accuracy <= 100:
+            print('Prediction accuracy must be an integer between 70 and 100.')
+
+    def _make_output(self):
+        with open(self._settings_template, 'r') as f:
+            txt = f.read()
+
+        pairs = [('NUM_FULL_PASSES', self._full_passes),
+                 ('PERCENT_PRED_ACCURACY', self._pred_accuracy),
+                 ('BARCODE_FASTA_DIR', self._barcode_file)]
+
+        for old, new in pairs:
+            txt = txt.replace(old, new)
+
+        with open(self.settings_output, 'w') as f:
+            f.write(txt)
+
+
 class CcsJob:
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    settings_template = script_dir + '/settings_template.xml'
     inputs_template = script_dir + '/inputs_template.xml'
     counter_script = script_dir + '/count_ccs_passes.py'
     smrt_script = script_dir + '/smrt_pipe_job.sh'
@@ -77,20 +119,6 @@ class CcsJob:
         self.video_path = video_path
         self.inputs = self.outdir + '/inputs.xml'
         self.pass_counts = None
-
-    def make_settings_file(self):
-        with open(self.settings_template, 'r') as f:
-            txt = f.read()
-
-        pairs = [('NUM_FULL_PASSES', self.full_passes),
-                 ('PERCENT_PRED_ACCURACY', self.pred_accuracy),
-                 ('BARCODE_FASTA_DIR', self.barcode_file)]
-
-        for old, new in pairs:
-            txt = txt.replace(old, new)
-
-        with open(self.settings, 'w') as f:
-            f.write(txt)
 
     def make_inputs_file(self):
         with open(self.inputs_template, 'r') as f:
@@ -164,6 +192,8 @@ class PolymerasePasses:
 
 def main():
     args = make_args()
+    print(args)
+    return
 
     verify_args(args)
 
