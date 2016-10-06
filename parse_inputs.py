@@ -3,6 +3,12 @@ import os
 import sys
 from itertools import groupby
 
+sample_specific_parameters = {'name', 'barcode1', 'barcode2'}
+general_parameters = {'barcode_file', 'video_path',
+                      'outdir', 'full_passes', 'pred_accuracy',
+                      'barcode_mode', 'job_name'}
+all_parameters = sample_specific_parameters.union(general_parameters)
+
 
 def make_args():
     parser = argparse.ArgumentParser(description='Create SMRT pipe ccs jobs',
@@ -74,13 +80,15 @@ def group_by_job(input_file):
     """
     with open(input_file, 'r') as f:
         col_numbers = {x: i for i, x in enumerate(f.readline().rstrip('\n').split('\t'))}
-
         data = [line.rstrip('\n').split('\t') for line in f.readlines()]
+
+    for param in all_parameters:
+        if param not in col_numbers:
+            sys.exit('Error:  The column heading ' + param + ' must appear in' +
+                     ' the input file.  The input file must be tab separated.')
 
     project_names = set()
     project_outdir = data[0][col_numbers['outdir']]
-
-    sample_specific_parameters = {'name', 'barcode1', 'barcode2'}
 
     jobs = list()
 
@@ -117,7 +125,7 @@ def group_by_job(input_file):
 
             if parameters:
                 for param_name, col_num in col_numbers.items():
-                    if param_name not in sample_specific_parameters:
+                    if param_name in general_parameters:
                         sample_value = sample[col_num]
                         if sample_value != parameters[param_name]:
                             sys.exit("Error:  The value for " + param_name +
@@ -125,10 +133,22 @@ def group_by_job(input_file):
                                      " doesn't match other values in the job.")
             else:
                 for param_name, col_num in col_numbers.items():
-                    if param_name not in sample_specific_parameters:
+                    if param_name in general_parameters:
                         parameters[param_name] = sample[col_num]
             samples.append({param_name: sample[col_numbers[param_name]] for param_name in sample_specific_parameters})
 
         jobs.append({'samples': samples, 'parameters': parameters})
 
     return jobs
+
+
+def organize_single_job_inputs(args):
+    args = vars(args)
+    samples = {param: args[param] for param in sample_specific_parameters}
+    if samples['barcode1'] == samples['barcode2']:
+        sys.exit('Error:  The barcodes for sample ' + samples['name'] +
+                 ' are the same.')
+
+    parameters = {param: args[param] for param in general_parameters}
+
+    return [{'samples': [samples], 'parameters': parameters}]

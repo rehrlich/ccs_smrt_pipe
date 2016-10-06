@@ -6,16 +6,6 @@ from subprocess import call
 import parse_inputs
 
 
-def verify_args(args):
-    if os.path.isfile(args.outdir + '/fq/' + args.name + '.fastq'):
-        print('Error:  A sample with the name ' + args.name +
-              ' already exists.  Please change either the name or the '
-              'output directory and try again.')
-    else:
-        return
-    sys.exit()
-
-
 class CCSSettings:
     _script_dir = os.path.dirname(os.path.abspath(__file__))
     _settings_template = _script_dir + '/settings_template.xml'
@@ -145,6 +135,10 @@ def main():
         jobs = parse_inputs.group_by_job(args.input_file)
     else:
         print('single mode')
+        args.job_name = args.name
+        jobs = parse_inputs.organize_single_job_inputs(args)
+    for job in jobs:
+        print(job)
     return
 
     verify_args(args)

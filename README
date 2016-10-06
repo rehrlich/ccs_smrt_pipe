@@ -25,6 +25,7 @@ Each line in the file is one sample and each column is a parameter for a ccs job
 All barcodes for a single job name should be unique.  For example, if job1 has sample A with barcode b1=x1 and b2=x2 then sample B from job1 cannot have x1 for either of its barcodes.  A different job can have a sample with barcode b1=x1 and b2=x2.
 All sample names must be unique for their outdir.  TODO: decide if multiple outdirs are allowed - no because each outdir should be a project and you should use different input files for different projects
 
+
 Steps:
 A bash script checks that SMRT_ROOT/current/etc/setup.sh exists and sources it.
 Bash script calls python script which does all command line parsing.
