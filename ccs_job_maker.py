@@ -1,61 +1,9 @@
-import argparse
 import os
 import sys
 from glob import iglob
 from subprocess import call
 
-
-def make_args():
-    parser = argparse.ArgumentParser(description='Create SMRT pipe ccs jobs',
-                                     add_help=True,
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    subparsers = parser.add_subparsers(help='sub-command help')
-
-    batch_parser = subparsers.add_parser('batch', help='batch input help')
-    required_flags_batch = batch_parser.add_argument_group('Required arguments')
-    required_flags_batch.add_argument('-i', '--input_file',
-                                      help='batch input file',
-                                      required=True)
-
-    single_parser = subparsers.add_parser('single', help='single input help',
-                                          formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    single_parser.add_argument('-o', '--outdir',
-                               help='output directory',
-                               default=os.getcwd() + '/smrt_pipe_ccs')
-    single_parser.add_argument('-n', '--name',
-                               help='A name for the fastq output file',
-                               default='Sample1')
-    single_parser.add_argument('-fp', '--full_passes',
-                               help='The minimum number of full passes which must be an integer between zero and ten',
-                               type=int,
-                               default=3)
-    single_parser.add_argument('-pa', '--pred_accuracy',
-                               help='Minimum prediction accuracy which must be an integer between 70 and 100',
-                               type=int,
-                               default=90)
-    single_parser.add_argument('-bcm', '--barcode_mode',
-                               help='must be either "asymmetric" or "symmetric"',
-                               choices=['asymmetric', 'symmetric'],
-                               default='asymmetric')
-
-    required_flags = single_parser.add_argument_group('Required arguments')
-
-    required_flags.add_argument('-bcf', '--barcode_file',
-                                help='The path to the fasta file with the barcodes',
-                                required=True)
-    required_flags.add_argument('-v', '--video_path',
-                                help='The directory containing the *.bax.h5 files',
-                                required=True)
-    required_flags.add_argument('-b1', '--barcode1',
-                                help='The forward barcode name',
-                                required=True)
-    required_flags.add_argument('-b2', '--barcode2',
-                                help='The reverse barcode name',
-                                required=True)
-
-    return parser.parse_args()
+import parse_inputs
 
 
 def verify_args(args):
@@ -191,8 +139,12 @@ class PolymerasePasses:
 
 
 def main():
-    args = make_args()
-    print(args)
+    args = parse_inputs.make_args()
+    if 'input_file' in args:
+        print('batch mode')
+        jobs = parse_inputs.group_by_job(args.input_file)
+    else:
+        print('single mode')
     return
 
     verify_args(args)
