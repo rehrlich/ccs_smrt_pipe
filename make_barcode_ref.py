@@ -1,4 +1,5 @@
 import os
+import shutil
 from subprocess import PIPE, Popen, call
 import sys
 from itertools import chain
@@ -8,39 +9,34 @@ class BarcodeRef:
     def __init__(self, sample_data, job_dir, barcode_file):
         self._ordered_barcode_file = job_dir + '/ordered_barcodes.fasta'
         self._barcode_dir = job_dir + '/barcode_ref'
+        call(['mkdir', '-p', self._barcode_dir])
         self._ordered_barcodes = list(chain.from_iterable([(x['barcode1'], x['barcode2']) for x in sample_data]))
         self._barcode_file = barcode_file
         self._check_parameters()
         self._make_ordered_fasta()
-        self._upload_ref()
+        self._upload_ref(self._ordered_barcode_file)
 
     @staticmethod
-    def popen(cmd):
-        p = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
-        output = p.communicate()[1].decode(encoding='UTF-8')
-        return output
+    def _get_sample_fasta():
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        sample_fasta = script_dir + '/example.fasta'
+        if not os.path.isfile(sample_fasta):
+            sys.exit('Error:  The example.fasta file, which is used for error '
+                     'checking, was not found.  Did you download it?')
+        return sample_fasta
 
     def _check_parameters(self):
         if not os.path.isfile(self._barcode_file):
             sys.exit('Error:  The barcode file ' + self._barcode_file +
                      ' does not exist.')
 
-        # Not using this reference but this checks that the fasta is valid
-        cmd = ['referenceUploader',
-               '-c', '-p', self._barcode_dir,
-               '-n', 'barcode_ref',
-               '-f', self._barcode_file]
-        expected_output = ('SLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".\n' +
-                            'SLF4J: Defaulting to no-operation (NOP) logger implementation\n' +
-                            'SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.\n')
-
-        output = self.popen(cmd)
+        expected_output = self._upload_ref(self._get_sample_fasta())
+        output = self._upload_ref(self._barcode_file)
 
         if output != expected_output:
             print(output)
             sys.exit('Error:  Could not create barcode reference from the ' +
                      'fasta file ' + self._barcode_file)
-        call(['rm', '-r', self._barcode_dir])
 
         with open(self._barcode_file, 'r') as f:
             fasta = f.read()
@@ -70,9 +66,15 @@ class BarcodeRef:
                     entry += '\n'
                 f.write(entry)
 
-    def _upload_ref(self):
+    def _upload_ref(self, fasta_path):
+        shutil.rmtree(self._barcode_dir)
         cmd = ['referenceUploader',
                '-c', '-p', self._barcode_dir,
                '-n', 'barcode_ref',
-               '-f', self._ordered_barcode_file]
-        self.popen(cmd)
+               '-f', fasta_path,
+               '-x', 'samtools faidx']
+
+        p = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
+        output = p.communicate()[1].decode(encoding='UTF-8')
+        return output
+
