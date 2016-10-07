@@ -8,8 +8,8 @@ from itertools import chain
 class BarcodeRef:
     def __init__(self, sample_data, job_dir, barcode_file):
         self._ordered_barcode_file = job_dir + '/ordered_barcodes.fasta'
-        self._barcode_dir = job_dir + '/barcode_ref'
-        call(['mkdir', '-p', self._barcode_dir])
+        self.barcode_dir = job_dir + '/barcode_ref'
+        call(['mkdir', '-p', self.barcode_dir])
         self._ordered_barcodes = list(chain.from_iterable([(x['barcode1'], x['barcode2']) for x in sample_data]))
         self._barcode_file = barcode_file
         self._check_parameters()
@@ -67,9 +67,9 @@ class BarcodeRef:
                 f.write(entry)
 
     def _upload_ref(self, fasta_path):
-        shutil.rmtree(self._barcode_dir)
+        shutil.rmtree(self.barcode_dir)
         cmd = ['referenceUploader',
-               '-c', '-p', self._barcode_dir,
+               '-c', '-p', self.barcode_dir,
                '-n', 'barcode_ref',
                '-f', fasta_path,
                '-x', 'samtools faidx']

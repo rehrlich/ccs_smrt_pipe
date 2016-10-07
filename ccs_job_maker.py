@@ -1,80 +1,45 @@
 import os
 import sys
-from glob import iglob
 from subprocess import call
 
 import parse_inputs
+import make_barcode_ref
+import make_xml_inputs
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
-class CCSSettings:
-    _script_dir = os.path.dirname(os.path.abspath(__file__))
-    _settings_template = _script_dir + '/settings_template.xml'
-
-    def __init__(self, full_passes, pred_accuracy, barcode_file,
-                 settings_output):
-
-        self._full_passes = full_passes
-        self._pred_accuracy = pred_accuracy
-        self._barcode_file = barcode_file
-        self.settings_output = settings_output
-
-    def _check_parameters(self):
-        if not 0 <= self._full_passes <= 10:
-            print('Full passes must be an integer between zero and 10.')
-        if not 70 <= self._pred_accuracy <= 100:
-            print('Prediction accuracy must be an integer between 70 and 100.')
-
-    def _make_output(self):
-        with open(self._settings_template, 'r') as f:
-            txt = f.read()
-
-        pairs = [('NUM_FULL_PASSES', self._full_passes),
-                 ('PERCENT_PRED_ACCURACY', self._pred_accuracy),
-                 ('BARCODE_FASTA_DIR', self._barcode_file)]
-
-        for old, new in pairs:
-            txt = txt.replace(old, new)
-
-        with open(self.settings_output, 'w') as f:
-            f.write(txt)
-
-
-class CcsJob:
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    inputs_template = script_dir + '/inputs_template.xml'
+class CCSJob:
     counter_script = script_dir + '/count_ccs_passes.py'
     smrt_script = script_dir + '/smrt_pipe_job.sh'
 
-    def __init__(self, outdir, full_passes, pred_acc, barcode_file, video_path):
-        self.outdir = outdir
-        os.makedirs(self.outdir, exist_ok=True)
+    def __init__(self, parameters, samples):
+        self.job_dir = parameters['outdir'] + '/' + parameters['job_name']
 
-        self.barcoded_samples = list()
-        self.full_passes = full_passes
-        self.pred_accuracy = pred_acc
-        self.barcode_file = barcode_file
-        self.settings = self.outdir + '/settings.xml'
-        self.video_path = video_path
-        self.inputs = self.outdir + '/inputs.xml'
-        self.pass_counts = None
+        self.barcode_ref = make_barcode_ref.BarcodeRef(sample_data=samples,
+                                                       job_dir=self.job_dir,
+                                                       barcode_file=parameters[
+                                                           'barcode_file'])
 
-    def make_inputs_file(self):
-        with open(self.inputs_template, 'r') as f:
-            txt = f.read()
+        self.ccs_settings = make_xml_inputs.CCSSettings(
+            full_passes=parameters['full_passes'],
+            pred_accuracy=parameters['pred_accuracy'],
+            barcode_file=self.barcode_ref.barcode_dir,
+            job_dir=self.job_dir)
 
-        for full_path in iglob(self.video_path + '/*.bax.h5'):
-            video_num = full_path[-8]
-            txt = txt.replace('VIDEO' + video_num, full_path)
+        self.ccs_inputs = make_xml_inputs.CCSInputs(
+            video_dir=parameters['video_path'],
+            job_dir=self.job_dir)
 
-        with open(self.inputs, 'w') as f:
-            f.write(txt)
+
+        # self.outdir = outdir
+        # os.makedirs(self.outdir, exist_ok=True)
+        #
+        # self.barcoded_samples = list()
+        # self.barcode_file = barcode_file
+        # self.pass_counts = None
 
     def run(self, smrt_root):
-        if not os.path.isfile(self.settings):
-            self.make_settings_file()
-        if not os.path.isfile(self.inputs):
-            self.make_inputs_file()
-
         self.pass_counts = self.outdir + '/data/pass_counts.txt'
         call(['bash', self.smrt_script, smrt_root, self.outdir,
               self.settings, self.inputs, self.counter_script,
@@ -85,15 +50,6 @@ class CcsJob:
                                 '--' + sample.barcode2 + '.fastq'
         assert os.path.isfile(sample.uncounted_path)
         self.barcoded_samples.append(sample)
-
-
-class BarcodedSample:
-    def __init__(self, barcode1, barcode2, nickname):
-        self.barcode1 = barcode1
-        self.barcode2 = barcode2
-        self.nickname = nickname
-        self.counted_path = None
-        self.uncounted_path = None
 
 
 class PolymerasePasses:
@@ -138,10 +94,8 @@ def main():
         args.job_name = args.name
         jobs = parse_inputs.organize_single_job_inputs(args)
     for job in jobs:
-        print(job)
+        CCSJob(job['parameters'], job['samples'])
     return
-
-    verify_args(args)
 
     cL_job = CcsJob(args.outdir + '/job1', str(args.full_passes),
                     str(args.pred_accuracy),
