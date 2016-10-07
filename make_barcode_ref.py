@@ -7,6 +7,7 @@ from itertools import chain
 
 class BarcodeRef:
     def __init__(self, sample_data, job_dir, barcode_file):
+        self._sample_data = sample_data
         self._ordered_barcode_file = job_dir + '/ordered_barcodes.fasta'
         self.barcode_dir = job_dir + '/barcode_ref'
         call(['mkdir', '-p', self.barcode_dir])
@@ -77,4 +78,15 @@ class BarcodeRef:
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
         output = p.communicate()[1].decode(encoding='UTF-8')
         return output
+
+    def get_name_fastq_pairs(self):
+        """
+        :return: list of (name, fastq name NOT path)
+        """
+        pairs = list()
+        for sample in self._sample_data:
+            pairs.append((sample['name'],
+                          sample['barcode1'] + '--' + sample['barcode2'] +
+                          '.fastq'))
+        return pairs
 

@@ -65,6 +65,14 @@ class CCSInputs:
                 print('The video directory has bam files.  This script only ' +
                       'works for bax.h5 files.')
             sys.exit()
+
+        safe_suffixes = {'.1.bax.h5', '.2.bax.h5', '.3.bax.h5'}
+        for video_path in self._video_paths:
+            if video_path[-9:] not in safe_suffixes:
+                sys.exit('Error:  The .bax.h5 file names have been modified.' +
+                         '  Video files must end with one of the following ' +
+                         'suffixes:  ' + ' '.join(safe_suffixes))
+
         validate_template(self._inputs_template)
 
     def _make_file(self):
