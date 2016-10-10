@@ -1,3 +1,6 @@
+# Author:  Rachel Ehrlich
+
+
 import argparse
 import os
 import sys

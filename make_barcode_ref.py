@@ -1,3 +1,6 @@
+# Author:  Rachel Ehrlich
+
+
 import os
 import shutil
 from subprocess import PIPE, Popen, call

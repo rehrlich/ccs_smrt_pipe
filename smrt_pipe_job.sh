@@ -1,13 +1,9 @@
 #!/usr/bin/env bash
-#$ -j y
-#$ -cwd
-#$ -pe smp 16
-#$ -R y
+# Author:  Rachel Ehrlich
 
 out_dir=$1
 settings=$2
 inputs=$3
-
 
 smrtpipe.py --output=$out_dir --params=$settings xml:$inputs
 barcode_archive=$out_dir'/data/barcoded-fastqs.tgz'

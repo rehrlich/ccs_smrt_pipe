@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+# Author:  Rachel Ehrlich
+
+
 #$ -N ccs_jobs
 #$ -j y
 #$ -cwd

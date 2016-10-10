@@ -1,3 +1,6 @@
+# Author:  Rachel Ehrlich
+
+
 import sys
 import os
 

@@ -1,5 +1,7 @@
+# Author:  Rachel Ehrlich
+
+
 import os
-import sys
 from subprocess import call
 from glob import glob
 
