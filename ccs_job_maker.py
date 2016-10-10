@@ -6,6 +6,7 @@ from glob import glob
 import parse_inputs
 import make_barcode_ref
 import make_xml_inputs
+import count_passes
 
 script_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -32,7 +33,7 @@ class CCSJob:
             video_dir=parameters['video_path'],
             job_dir=self.job_dir)
 
-        self.ccs_h5_files = []
+        self.ccs_h5_files = glob(self.job_dir + '/data/*.ccs.h5')
 
     def run(self):
         call(['bash', 'smrt_pipe_job.sh', self.job_dir,
@@ -58,22 +59,28 @@ def main():
         print('single mode')
         args.job_name = args.name
         jobs = parse_inputs.organize_single_job_inputs(args)
+
+    project_dir = jobs[0]['parameters']['outdir']
+    fq_dir = project_dir + '/fastq'
+
     jobs = [CCSJob(job['parameters'], job['samples']) for job in jobs]
 
-    for job in jobs:
-        job.run()
+    # for job in jobs:
+    #     job.run()
+    # return
 
-    #
-    # pass_counts_path = cL_job.outdir + '/data/pass_counts.txt'
-    # poly_passes = PolymerasePasses(pass_counts_path)
-    #
-    # fq_outdir = args.outdir + '/fq/'
-    # os.makedirs(fq_outdir, exist_ok=True)
-    #
-    # for sample in cL_job.barcoded_samples:
-    #     sample.counted_path = fq_outdir + sample.nickname + '.fastq'
-    #     poly_passes.add_counts_to_fq(sample.uncounted_path, sample.counted_path)
-    #
+    call(['mkdir', fq_dir])
+
+    for job in jobs:
+        polymerase_pass_counts = count_passes.PolymerasePasses(job.ccs_h5_files)
+        for sample in job.get_name_to_fq():
+            fq_out = fq_dir + '/' + sample['name'] + '.fastq'
+            fq_in = sample['fastq']
+            print fq_in
+            assert os.path.isfile(fq_in)
+
+            polymerase_pass_counts.add_counts_to_fq(fq_in, fq_out)
+
 
 if __name__ == '__main__':
     main()

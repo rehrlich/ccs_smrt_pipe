@@ -1,8 +1,0 @@
-<?xml version="1.0"?>
-<pacbioAnalysisInputs>
-  <dataReferences>
-    <url ref="run:0000000-0000"><location>VIDEO1</location></url>
-    <url ref="run:0000000-0001"><location>VIDEO2</location></url>
-    <url ref="run:0000000-0002"><location>VIDEO3</location></url>
-  </dataReferences>
-</pacbioAnalysisInputs>
