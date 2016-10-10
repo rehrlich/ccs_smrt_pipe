@@ -72,11 +72,12 @@ class BarcodeRef:
         cmd = ['referenceUploader',
                '-c', '-p', self.barcode_dir,
                '-n', 'barcode_ref',
-               '-f', fasta_path,
-               '-x', 'samtools faidx']
+               '-f', fasta_path]
 
         p = Popen(cmd, stdout=PIPE, stderr=PIPE, stdin=PIPE)
         output = p.communicate()[1].decode(encoding='UTF-8')
+        call(['samtools', 'faidx',
+              self.barcode_dir + '/barcode_ref/sequence/barcode_ref.fasta'])
         return output
 
     def get_name_fastq_pairs(self):

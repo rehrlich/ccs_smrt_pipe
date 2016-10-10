@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-#$ -N ccs_job_maker
+#$ -N ccs_jobs
 #$ -j y
 #$ -cwd
 #$ -pe smp 16

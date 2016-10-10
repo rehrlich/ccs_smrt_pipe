@@ -25,7 +25,7 @@ class CCSJob:
         self.ccs_settings = make_xml_inputs.CCSSettings(
             full_passes=parameters['full_passes'],
             pred_accuracy=parameters['pred_accuracy'],
-            barcode_file=self.barcode_ref.barcode_dir,
+            barcode_file=self.barcode_ref.barcode_dir + '/barcode_ref',
             job_dir=self.job_dir)
 
         self.ccs_inputs = make_xml_inputs.CCSInputs(
@@ -35,7 +35,8 @@ class CCSJob:
         self.ccs_h5_files = []
 
     def run(self):
-        call(['bash', self.job_dir, self.ccs_settings.settings_output,
+        call(['bash', 'smrt_pipe_job.sh', self.job_dir,
+              self.ccs_settings.settings_output,
               self.ccs_inputs.inputs_file])
 
         self.ccs_h5_files = glob(self.job_dir + '/data/*.ccs.h5')
@@ -59,8 +60,8 @@ def main():
         jobs = parse_inputs.organize_single_job_inputs(args)
     jobs = [CCSJob(job['parameters'], job['samples']) for job in jobs]
 
-    # for job in jobs:
-    #     job.run()
+    for job in jobs:
+        job.run()
 
     #
     # pass_counts_path = cL_job.outdir + '/data/pass_counts.txt'

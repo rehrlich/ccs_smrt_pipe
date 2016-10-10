@@ -23,7 +23,7 @@ Multi sample mode:
 This runs many SMRT pipe ccs jobs.  Jobs are defined by a csv file.  The header line of the file is:  TODO: figure out all parameters
 Each line in the file is one sample and each column is a parameter for a ccs job.  All of the parameters work the same as the single sample parameters except for job name.  When multiple samples from the same SMRT cell can be demultiplexed using the same parameters, they can be given the same job name.  Otherwise, all job names must be unique.  Lines with the same job name must contain the same values for all parameters except for name, barcode1 and barcode2.
 All barcodes for a single job name should be unique.  For example, if job1 has sample A with barcode b1=x1 and b2=x2 then sample B from job1 cannot have x1 for either of its barcodes.  A different job can have a sample with barcode b1=x1 and b2=x2.
-All sample names must be unique for their outdir.  TODO: decide if multiple outdirs are allowed - no because each outdir should be a project and you should use different input files for different projects
+All sample names must have the same outdir.  All sample names must be unique.
 
 
 Steps:
@@ -110,12 +110,12 @@ OUTDIR/fq - this has the fastq output file(s).  The header lines are the headers
 Future issues:
 Min barcode score depends on barcode length.  This is the same issues I had with the short and long barcodes for genomes.
 "This parameter will filter outputs (fastq and aligned reads) by the minimum average barcode score for each molecule. The maximum possible score is 2 x (length of sequence in barcode FASTA). In the EGFR-MET test dataset using 21 bp padded barcodes, 99.5% calling accuracy is achieved at a minimum barcode score of 30. The same calling accuracy with 16bp unpadded barcodes can be achieved using a minimum barcode score of 23."
+Currently assuming asymmetric barcodes and ignoring the input
+
 
 
 Features:
-Make it work for # videos != 3
-Create and upload as a reference a correctly ordered barcode fasta file (might need to run samtools faidx which should be in smrt_root).  Save it to OUTDIR/job_name/barcode
-Parse input csv (pandas would be nice for this, but I can write a parser myself)
-Group together data to avoid redundant ccs smrt pipe jobs
 Output summary
 SGE mode?  I've never found a program that used this well.
+Suggest a bam to bax tool.  Is there one?
+Check that outdir doesn't exist and is an absolute path (do this after everything else works)
