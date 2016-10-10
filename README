@@ -34,46 +34,46 @@ All sample names must be unique.
 
 Single sample mode:
 Usage: ccs_job_maker.sh single [-h] [-o OUTDIR] [-n NAME] [-fp FULL_PASSES]  
-                               [-pa PRED_ACCURACY]  
-                               [-bcm {asymmetric,symmetric}] -bcf BARCODE_FILE  
-                               -v VIDEO_PATH -b1 BARCODE1 -b2 BARCODE2
+***************[-pa PRED_ACCURACY]
+***************[-bcm {asymmetric,symmetric}] -bcf BARCODE_FILE
+***************-v VIDEO_PATH -b1 BARCODE1 -b2 BARCODE2
 
 Optional arguments:  
-  -h, --help            show this help message and exit  
-  -o OUTDIR, --outdir OUTDIR  
-                        output directory (default: smrt_pipe_ccs)  
-  -n NAME, --name NAME  A name for the fastq output file (default: Sample1)  
-  -fp FULL_PASSES, --full_passes FULL_PASSES  
-                        The minimum number of full passes which must be an  
-                        integer between zero and ten (default: 3)  
-  -pa PRED_ACCURACY, --pred_accuracy PRED_ACCURACY  
-                        Minimum prediction accuracy which must be an integer  
-                        between 70 and 100 (default: 90)  
-  -bcm {asymmetric,symmetric}, --barcode_mode {asymmetric,symmetric}  
-                        must be either "asymmetric" or "symmetric" (default:  
-                        asymmetric)
+*-h, --help            show this help message and exit
+*-o OUTDIR, --outdir OUTDIR
+************output directory (default: smrt_pipe_ccs)
+*-n NAME, --name NAME  A name for the fastq output file (default: Sample1)
+*-fp FULL_PASSES, --full_passes FULL_PASSES
+************The minimum number of full passes which must be an
+************integer between zero and ten (default: 3)
+*-pa PRED_ACCURACY, --pred_accuracy PRED_ACCURACY
+************Minimum prediction accuracy which must be an integer
+************between 70 and 100 (default: 90)
+*-bcm {asymmetric,symmetric}, --barcode_mode {asymmetric,symmetric}
+************must be either "asymmetric" or "symmetric" (default:
+************asymmetric)
 
 Required arguments:  
-  -bcf BARCODE_FILE, --barcode_file BARCODE_FILE  
-                        The path to the fasta file with the barcodes (default:  
-                        None)  
-  -v VIDEO_PATH, --video_path VIDEO_PATH  
-                        The directory containing the *.bax.h5 files (default:  
-                        None)  
-  -b1 BARCODE1, --barcode1 BARCODE1  
-                        The forward barcode name (default: None)  
-  -b2 BARCODE2, --barcode2 BARCODE2  
-                        The reverse barcode name (default: None)  
+*-bcf BARCODE_FILE, --barcode_file BARCODE_FILE
+************The path to the fasta file with the barcodes (default:
+************None)
+*-v VIDEO_PATH, --video_path VIDEO_PATH
+************The directory containing the *.bax.h5 files (default:
+************None)
+*-b1 BARCODE1, --barcode1 BARCODE1
+************The forward barcode name (default: None)
+*-b2 BARCODE2, --barcode2 BARCODE2
+************The reverse barcode name (default: None)
 
 
 Multi sample mode:
 Usage: ccs_job_maker.sh batch [-h] -i INPUT_FILE  
 
 Optional arguments:  
-  -h, --help            show this help message and exit  
+*-h, --help            show this help message and exit
 
 Required arguments:  
-  -i INPUT_FILE, --input_file INPUT_FILE  
+*-i INPUT_FILE, --input_file INPUT_FILE
                         batch input file  
 
 
