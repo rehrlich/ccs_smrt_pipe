@@ -14,7 +14,6 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 
 
 class CCSJob:
-    counter_script = script_dir + '/count_ccs_passes.py'
     smrt_script = script_dir + '/smrt_pipe_job.sh'
 
     def __init__(self, parameters, samples):
@@ -67,9 +66,8 @@ def main():
 
     jobs = [CCSJob(job['parameters'], job['samples']) for job in jobs]
 
-    # for job in jobs:
-    #     job.run()
-    # return
+    for job in jobs:
+        job.run()
 
     call(['mkdir', fq_dir])
 
@@ -78,7 +76,7 @@ def main():
         for sample in job.get_name_to_fq():
             fq_out = fq_dir + '/' + sample['name'] + '.fastq'
             fq_in = sample['fastq']
-            print fq_in
+
             assert os.path.isfile(fq_in)
 
             polymerase_pass_counts.add_counts_to_fq(fq_in, fq_out)

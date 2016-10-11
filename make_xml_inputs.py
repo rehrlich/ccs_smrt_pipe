@@ -50,7 +50,6 @@ class CCSSettings:
 
 
 class CCSInputs:
-    _inputs_template = script_dir + '/inputs_template.xml'
 
     def __init__(self, video_dir, job_dir):
         self._video_dir = video_dir
@@ -75,8 +74,6 @@ class CCSInputs:
                 sys.exit('Error:  The .bax.h5 file names have been modified.' +
                          '  Video files must end with one of the following ' +
                          'suffixes:  ' + ' '.join(safe_suffixes))
-
-        validate_template(self._inputs_template)
 
     def _make_file(self):
         fofn = self._job_dir + '/videos.fofn'
