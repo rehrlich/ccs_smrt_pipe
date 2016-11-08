@@ -2,6 +2,7 @@
 
 
 import os
+import traceback
 from subprocess import call
 from glob import glob
 
@@ -72,14 +73,35 @@ def main():
     call(['mkdir', fq_dir])
 
     for job in jobs:
-        polymerase_pass_counts = count_passes.PolymerasePasses(job.ccs_h5_files)
-        for sample in job.get_name_to_fq():
-            fq_out = fq_dir + '/' + sample['name'] + '.fastq'
-            fq_in = sample['fastq']
+        try:
+            polymerase_pass_counts = count_passes.PolymerasePasses(job.ccs_h5_files)
+        except:
+            traceback.print_exc()
+            print('There was a problem counting ccs passes in the files:\n' +
+                  '\n'.join(job.ccs_h5_files) + '\nAttempting to count ccs ' +
+                  'passes for the remaining job(s).')
+            for sample in job.get_name_to_fq():
+                fq_in = sample['fastq']
+                if os.path.isfile(fq_in):
+                    fq_out = fq_dir + '/' + sample['name'] + '_no_ccs_count.fastq'
+                    call(['cp', fq_in, fq_out])
+                else:
+                    fq_out = fq_dir + '/' + sample['name'] + '.fastq'
+                    print('Something went wrong with the demultiplexing and ' +
+                          'the file\n' + fq_out + '\ncould not be created.  ' +
+                          'Did you use the correct barcodes and barcode file?')
 
-            assert os.path.isfile(fq_in)
+        else:
+            for sample in job.get_name_to_fq():
+                fq_out = fq_dir + '/' + sample['name'] + '.fastq'
+                fq_in = sample['fastq']
 
-            polymerase_pass_counts.add_counts_to_fq(fq_in, fq_out)
+                if os.path.isfile(fq_in):
+                    polymerase_pass_counts.add_counts_to_fq(fq_in, fq_out)
+                else:
+                    print('Something went wrong with the demultiplexing and ' +
+                          'the file\n' + fq_out + '\ncould not be created.  ' +
+                          'Did you use the correct barcodes and barcode file?')
 
 
 if __name__ == '__main__':
