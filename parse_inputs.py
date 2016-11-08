@@ -7,9 +7,8 @@ import sys
 from itertools import groupby
 
 sample_specific_parameters = {'name', 'barcode1', 'barcode2'}
-general_parameters = {'barcode_file', 'video_path',
-                      'outdir', 'full_passes', 'pred_accuracy',
-                      'barcode_mode', 'job_name'}
+general_parameters = {'barcode_file', 'video_path', 'outdir', 'full_passes',
+                      'pred_accuracy', 'job_name'}
 all_parameters = sample_specific_parameters.union(general_parameters)
 
 
@@ -43,10 +42,6 @@ def make_args():
                                help='Minimum prediction accuracy which must be an integer between 70 and 100',
                                type=int,
                                default=90)
-    single_parser.add_argument('-bcm', '--barcode_mode',
-                               help='must be either "asymmetric" or "symmetric"',
-                               choices=['asymmetric', 'symmetric'],
-                               default='asymmetric')
 
     required_flags = single_parser.add_argument_group('Required arguments')
 

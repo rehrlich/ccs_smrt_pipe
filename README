@@ -35,7 +35,7 @@ All sample names must be unique.
 Single sample mode:
 Usage: ccs_job_maker.sh single [-h] [-o OUTDIR] [-n NAME] [-fp FULL_PASSES]
                                [-pa PRED_ACCURACY]
-                               [-bcm {asymmetric,symmetric}] -bcf BARCODE_FILE
+                               -bcf BARCODE_FILE
                                -v VIDEO_PATH -b1 BARCODE1 -b2 BARCODE2
 
 Optional arguments:
@@ -49,9 +49,6 @@ Optional arguments:
   -pa PRED_ACCURACY, --pred_accuracy PRED_ACCURACY
                         Minimum prediction accuracy which must be an integer
                         between 70 and 100 (default: 90)
-  -bcm {asymmetric,symmetric}, --barcode_mode {asymmetric,symmetric}
-                        must be either "asymmetric" or "symmetric" (default:
-                        asymmetric)
 
 Required arguments:
   -bcf BARCODE_FILE, --barcode_file BARCODE_FILE
@@ -81,7 +78,6 @@ Detailed explanation of arguments:
 OUTDIR - This is a path to a directory that does not currently exist.  The default option is to create a directory called smrt_pipe_ccs in your current directory.
 FULL_PASSES - PacBio describes this as "The minimum number of full-length passes over the insert DNA for the read to be included."  It must be a whole number between zero and ten, inclusive.
 PRED_ACCURACY - PacBio describes this as "The minimum predicted accuracy (in %) of the Reads of Insert emitted."  It must be a whole number between 70 and 100, inclusive.
-BARCODE_MODE - This specifies the type of barcoding used so that barcodes can be scored correctly.  The argument is symmetric if the barcode sequences are the same on both sides of the insert and asymmetric if they are different.
 BARCODE_FILE - This is the path to a fasta file with the barcodes used for the experiment.
 VIDEO_PATH - A directory containing the *.bax.h5 data files.  In the directory with the raw data from a pacbio cell, this the Analysis_Results folder.  All *.bax.h5 files in the directory will be used.  On my computer this path would be something like /data/pacbio/rawdata/run_name/A01_1/Analysis_Results
 BARCODE - b1 and b2 must be valid fasta headers from the barcode fasta file.

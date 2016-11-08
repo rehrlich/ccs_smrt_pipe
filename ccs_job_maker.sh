@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
-
-# Author:  Rachel Ehrlich
-
-
 #$ -N ccs_jobs
 #$ -j y
 #$ -cwd
 #$ -pe smp 16
 #$ -R y
+
+# Author:  Rachel Ehrlich
+
 
 SMRT_ROOT="/opt/smrtanalysis"
 
