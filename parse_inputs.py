@@ -9,6 +9,7 @@ from itertools import groupby
 sample_specific_parameters = {'name', 'barcode1', 'barcode2'}
 general_parameters = {'barcode_file', 'video_path', 'outdir', 'full_passes',
                       'pred_accuracy', 'job_name'}
+path_parameters = {'barcode_file', 'video_path', 'outdir'}
 all_parameters = sample_specific_parameters.union(general_parameters)
 
 
@@ -59,6 +60,16 @@ def make_args():
                                 required=True)
 
     return parser.parse_args()
+
+
+def make_paths_absolute(parameters):
+    abs_parameters = dict()
+    for parameter, value in parameters.items():
+        if parameter in path_parameters:
+            abs_parameters[parameter] = os.path.abspath(value)
+        else:
+            abs_parameters[parameter] = value
+    return abs_parameters
 
 
 def group_by(unsorted_iterable, key_func):
@@ -134,7 +145,7 @@ def group_by_job(input_file):
                     if param_name in general_parameters:
                         parameters[param_name] = sample[col_num]
             samples.append({param_name: sample[col_numbers[param_name]] for param_name in sample_specific_parameters})
-
+        parameters = make_paths_absolute(parameters)
         jobs.append({'samples': samples, 'parameters': parameters})
 
     return jobs
@@ -148,5 +159,7 @@ def organize_single_job_inputs(args):
                  ' are the same.')
 
     parameters = {param: args[param] for param in general_parameters}
+    parameters = make_paths_absolute(parameters)
 
     return [{'samples': [samples], 'parameters': parameters}]
+
