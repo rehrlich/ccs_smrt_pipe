@@ -6,7 +6,8 @@ import os
 import sys
 from itertools import groupby
 
-sample_specific_parameters = {'name', 'barcode1', 'barcode2'}
+sample_specific_parameters = {'sample_name', 'forward_barcode',
+                              'reverse_barcode'}
 general_parameters = {'barcode_file', 'video_path', 'outdir', 'full_passes',
                       'pred_accuracy', 'job_name'}
 path_parameters = {'barcode_file', 'video_path', 'outdir'}
@@ -132,7 +133,7 @@ def group_by_job(input_file):
                          ' the wrong number of columns.  Please remove any'
                          ' empty rows.')
 
-            sample_name = sample[col_numbers['name']]
+            sample_name = sample[col_numbers['sample_name']]
             if sample_name in project_names:
                 sys.exit('Error:  The sample named ' + sample_name +
                          ' is not unique in the input file.')
@@ -142,7 +143,7 @@ def group_by_job(input_file):
             if sample_outdir != project_outdir:
                 sys.exit('Error:  All samples must have the same outdir.')
 
-            bc1, bc2 = sample[col_numbers['barcode1']], sample[col_numbers['barcode2']]
+            bc1, bc2 = sample[col_numbers['forward_barcode']], sample[col_numbers['reverse_barcode']]
             if bc1 == bc2:
                 sys.exit('Error:  The barcodes for sample ' + sample_name +
                          ' are the same.')
@@ -164,7 +165,9 @@ def group_by_job(input_file):
                 for param_name, col_num in col_numbers.items():
                     if param_name in general_parameters:
                         parameters[param_name] = sample[col_num]
-            samples.append({param_name: sample[col_numbers[param_name]] for param_name in sample_specific_parameters})
+            samples.append({'name': sample[col_numbers['sample_name']],
+                            'barcode1': sample[col_numbers['forward_barcode']],
+                            'barcode2': sample[col_numbers['reverse_barcode']]})
         parameters = make_paths_absolute(parameters)
         check_sample_names(samples)
         jobs.append({'samples': samples, 'parameters': parameters})

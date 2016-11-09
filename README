@@ -19,15 +19,15 @@ The set of barcodes you purchased should have a fasta file with their sequences.
 The order of the barcodes in this file doesn't matter.  Extra barcodes are also fine.
 
 
-Single sample mode:
+Command line mode:
 This is intended to be used for debugging and testing parameters in a bash loop.  You should generally use the multi sample mode because it is more efficient when you have multiple samples per cell.
 This takes several command line inputs (described below) and runs a SMRT pipe circular consensus sequencing (ccs) job to create a consensus fastq file.
 
 
-Multi sample mode:
-This runs many SMRT pipe ccs jobs.  Jobs are defined by a tab separated file.  The first line of the file must include the following column headings in any order:  job_name	barcode_file	video_path	barcode1	barcode2	outdir	name	full_passes	pred_accuracy	barcode_mode
-Each line in the file is one sample and each column is a parameter for a ccs job.  All of the parameters work the same as the single sample parameters except for job name.  When multiple samples from the same SMRT cell can be demultiplexed using the same parameters, they should be given the same job name.  Otherwise, they must be given different names.  Lines with the same job name must contain the same values for all parameters except for name, barcode1 and barcode2.
-All barcodes for a single job name should be unique.  For example, if job1 has sample A with barcode b1=x1 and b2=x2 then sample B from job1 cannot have x1 for either of its barcodes.  A different job can have a sample with barcode b1=x1 and b2=x2.
+Batch input mode:
+This runs many SMRT pipe ccs jobs.  Jobs are defined by a tab separated file.  The first line of the file must include the following column headings in any order:  job_name	barcode_file	video_path	forward_barcode	reverse_barcode	outdir	sample_name	full_passes	pred_accuracy	barcode_mode
+Each line in the file is one sample and each column is a parameter for a ccs job.  Each job must include at least two samples.  The parameters are the same as the single sample parameters except for job name, sample name and the barcodes.  When multiple samples from the same SMRT cell can be demultiplexed using the same parameters, they should be given the same job name.  Otherwise, they must be given different names.  Lines with the same job name must contain the same values for all parameters except for the sample name and barcodes.
+All barcodes for a single job name should be unique.  For example, if job1 has sample A with forward_barcode=x1 and reverse_barcode=x2 then sample B from job1 cannot have x1 for either of its barcodes.  A different job can have a sample with barcodes x1 and x2.
 All jobs must have the same outidr.
 All sample names must be unique.
 
@@ -81,8 +81,10 @@ FULL_PASSES - PacBio describes this as "The minimum number of full-length passes
 PRED_ACCURACY - PacBio describes this as "The minimum predicted accuracy (in %) of the Reads of Insert emitted."  It must be a whole number between 70 and 100, inclusive.
 BARCODE_FILE - This is the path to a fasta file with the barcodes used for the experiment.
 VIDEO_PATH - A directory containing the *.bax.h5 data files.  In the directory with the raw data from a pacbio cell, this the Analysis_Results folder.  All *.bax.h5 files in the directory will be used.  On my computer this path would be something like /data/pacbio/rawdata/run_name/A01_1/Analysis_Results
-SAMPLE_NAME FBARCODE RBARCODE - You must use the -s flag at least twice.  The flag must be followed by a space separated list of three values:  sample name, forward barcode, and reverse barcode.  The sample name is a nickname for the sample.  The barcode names must be valid fasta headers from the barcode fasta file.  All values must be unique.  This means if you ues the -s flag three times, you must use three different sample names and six different barcode names.  Sample names cannot end with '_no_ccs_count', and 'all_samples' is not a valid sample name.
-
+SAMPLE_NAME FBARCODE RBARCODE - (command line only)  You must use the -s flag at least twice.  The flag must be followed by a space separated list of three values:  sample name, forward barcode, and reverse barcode.  The sample name is a nickname for the sample.  The barcode names must be valid fasta headers from the barcode fasta file.  All values must be unique.  This means if you ues the -s flag three times, you must use three different sample names and six different barcode names.  Sample names cannot end with '_no_ccs_count', and 'all_samples' is not a valid sample name.
+SAMPLE_NAME - (batch input file only)  A name for the sample.  All names in the file must be unique.  Sample names cannot end with '_no_ccs_count', and 'all_samples' is not a valid sample name.  This will be use to name the final fastq file.
+FORWARD_BARCODE - (batch input file only)  The barcode name must be valid fasta headers from the barcode fasta file.  All barcodes for a job must be unique.
+REVERSE_BARCODE - (batch input file only)  The other barcode for the sample.
 
 Detailed explanation of output directory:
 OUTDIR/fastq - This has the fastq output file(s).  The header lines are the headers created by smrtpipe with ';ccs=X;barcodelabel=Y;' appended to the end.  X is the number of ccs passes that were used to generate that entry in the file.  Y is the sample name.
