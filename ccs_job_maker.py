@@ -52,6 +52,14 @@ class CCSJob:
         return pairs
 
 
+def concat_fastqs(fq_dir):
+    cmd = [x for x in glob(fq_dir + '/*.fastq') if
+           not x.endswith('_no_ccs_count.fastq')]
+    cmd.insert(0, 'cat')
+    with open(fq_dir + '/all_samples.fastq', 'w') as f:
+        call(cmd, stdout=f)
+
+
 def main():
     args = parse_inputs.make_args()
     if 'input_file' in args:
@@ -104,6 +112,8 @@ def main():
                     print('Something went wrong with the demultiplexing and ' +
                           'the file\n' + fq_out + '\ncould not be created.  ' +
                           'Did you use the correct barcodes and barcode file?')
+
+    concat_fastqs(fq_dir)
 
 
 if __name__ == '__main__':

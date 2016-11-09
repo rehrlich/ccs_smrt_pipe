@@ -88,6 +88,15 @@ def group_by(unsorted_iterable, key_func):
     return groupby(sorted_iterable, key_func)
 
 
+def check_sample_names(samples):
+    for sample in samples:
+        name = sample['name']
+        if name == 'all_samples':
+            sys.exit('Error:  all_samples is not a valid sample name.')
+        if name.endswith('_no_ccs_count'):
+            sys.exit('Error:  sample names cannot end with "_no_ccs_count"')
+
+
 def group_by_job(input_file):
     """This would be so much easier with pandas...
     Check that everything gets the same outdir - can't exist yet
@@ -157,6 +166,7 @@ def group_by_job(input_file):
                         parameters[param_name] = sample[col_num]
             samples.append({param_name: sample[col_numbers[param_name]] for param_name in sample_specific_parameters})
         parameters = make_paths_absolute(parameters)
+        check_sample_names(samples)
         jobs.append({'samples': samples, 'parameters': parameters})
 
     return jobs
@@ -173,6 +183,8 @@ def organize_single_job_inputs(args):
         samples.append({'name': sample_barcode1_barcode2[0],
                         'barcode1': sample_barcode1_barcode2[1],
                         'barcode2': sample_barcode1_barcode2[2]})
+
+    check_sample_names(samples)
 
     names = [x['name'] for x in samples]
     if len(names) > len(set(names)):
