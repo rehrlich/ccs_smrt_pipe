@@ -43,7 +43,7 @@ class PolymerasePasses:
                               'sure your copy has been correctly patched and ' +
                               'updated.')
                         sys.exit()
-                    counted_fq.append(name + ';ccs=' + count + ';' +
+                    counted_fq.append('@' + name + ';ccs=' + count + ';' +
                                       header_suffix + '\n')
                 else:
                     counted_fq.append(line)
