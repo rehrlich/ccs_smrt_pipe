@@ -20,21 +20,24 @@ def make_args():
 
     subparsers = parser.add_subparsers(help='sub-command help')
 
-    batch_parser = subparsers.add_parser('batch', help='batch input help')
+    batch_parser = subparsers.add_parser('batch', help='batch input file help')
     required_flags_batch = batch_parser.add_argument_group('Required arguments')
     required_flags_batch.add_argument('-i', '--input_file',
                                       help='batch input file',
                                       required=True)
 
-    single_parser = subparsers.add_parser('single', help='single input help',
+    single_parser = subparsers.add_parser('command_line', help='command line input help',
                                           formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     single_parser.add_argument('-o', '--outdir',
                                help='output directory',
                                default=os.getcwd() + '/smrt_pipe_ccs')
-    single_parser.add_argument('-n', '--name',
-                               help='A name for the fastq output file',
-                               default='Sample1')
+    single_parser.add_argument('-j', '--job_name',
+                               help='a name for the smrt pipe job',
+                               default='smrt_pipe_job')
+    # single_parser.add_argument('-n', '--name',
+    #                            help='A name for the fastq output file',
+    #                            default='Sample1')
     single_parser.add_argument('-fp', '--full_passes',
                                help='The minimum number of full passes which must be an integer between zero and ten',
                                type=int,
@@ -52,12 +55,20 @@ def make_args():
     required_flags.add_argument('-v', '--video_path',
                                 help='The directory containing the *.bax.h5 files',
                                 required=True)
-    required_flags.add_argument('-b1', '--barcode1',
-                                help='The forward barcode name',
+    required_flags.add_argument('-s', '--sample_Fbarcode_Rbarcode',
+                                help='A space separated list of the sample '
+                                     'name and both barcode names.  You must '
+                                     'use this flag at least twice.',
+                                nargs=3,
+                                action='append',
+                                metavar=('SAMPLE_NAME', 'FBARCODE', 'RBARCODE'),
                                 required=True)
-    required_flags.add_argument('-b2', '--barcode2',
-                                help='The reverse barcode name',
-                                required=True)
+    # required_flags.add_argument('-b1', '--barcode1',
+    #                             help='The forward barcode name',
+    #                             required=True)
+    # required_flags.add_argument('-b2', '--barcode2',
+    #                             help='The reverse barcode name',
+    #                             required=True)
 
     return parser.parse_args()
 
@@ -153,13 +164,28 @@ def group_by_job(input_file):
 
 def organize_single_job_inputs(args):
     args = vars(args)
-    samples = {param: args[param] for param in sample_specific_parameters}
-    if samples['barcode1'] == samples['barcode2']:
-        sys.exit('Error:  The barcodes for sample ' + samples['name'] +
-                 ' are the same.')
+    samples = list()
+
+    if len(args['sample_Fbarcode_Rbarcode']) < 2:
+        sys.exit('Error:  You must use the -s flag at least twice.')
+
+    for sample_barcode1_barcode2 in args['sample_Fbarcode_Rbarcode']:
+        samples.append({'name': sample_barcode1_barcode2[0],
+                        'barcode1': sample_barcode1_barcode2[1],
+                        'barcode2': sample_barcode1_barcode2[2]})
+
+    names = [x['name'] for x in samples]
+    if len(names) > len(set(names)):
+        sys.exit('Error:  all sample names must be unique.')
+
+    barcodes = [x['barcode1'] for x in samples]
+    barcodes.extend(x['barcode2'] for x in samples)
+
+    if len(barcodes) > len(set(barcodes)):
+        sys.exit('Error:  all barcode names must be unique.')
 
     parameters = {param: args[param] for param in general_parameters}
     parameters = make_paths_absolute(parameters)
 
-    return [{'samples': [samples], 'parameters': parameters}]
+    return [{'samples': samples, 'parameters': parameters}]
 

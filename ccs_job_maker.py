@@ -58,8 +58,7 @@ def main():
         print('batch mode')
         jobs = parse_inputs.group_by_job(args.input_file)
     else:
-        print('single mode')
-        args.job_name = args.name
+        print('command_line mode')
         jobs = parse_inputs.organize_single_job_inputs(args)
 
     project_dir = jobs[0]['parameters']['outdir']
