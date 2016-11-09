@@ -27,7 +27,7 @@ class PolymerasePasses:
                 if num_passes > 0:
                     self._pass_counts['%s/%d/ccs' % (basename, hole_num)] = str(num_passes)
 
-    def add_counts_to_fq(self, in_fq, out_fq):
+    def add_counts_to_fq(self, in_fq, out_fq, header_suffix=''):
         counted_fq = list()
         with open(in_fq, 'r') as in_file:
             for i, line in enumerate(in_file):
@@ -43,7 +43,8 @@ class PolymerasePasses:
                               'sure your copy has been correctly patched and ' +
                               'updated.')
                         sys.exit()
-                    counted_fq.append(name + ';ccs=' + count + ';\n')
+                    counted_fq.append(name + ';ccs=' + count + ';' +
+                                      header_suffix + '\n')
                 else:
                     counted_fq.append(line)
 

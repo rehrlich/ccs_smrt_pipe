@@ -67,8 +67,8 @@ def main():
 
     jobs = [CCSJob(job['parameters'], job['samples']) for job in jobs]
 
-    for job in jobs:
-        job.run()
+    # for job in jobs:
+    #     job.run()
 
     call(['mkdir', fq_dir])
 
@@ -92,12 +92,15 @@ def main():
                           'Did you use the correct barcodes and barcode file?')
 
         else:
+
             for sample in job.get_name_to_fq():
                 fq_out = fq_dir + '/' + sample['name'] + '.fastq'
                 fq_in = sample['fastq']
 
                 if os.path.isfile(fq_in):
-                    polymerase_pass_counts.add_counts_to_fq(fq_in, fq_out)
+                    header_suffix = 'barcodelabel=' + sample['name'] + ';'
+                    polymerase_pass_counts.add_counts_to_fq(fq_in, fq_out,
+                                                            header_suffix)
                 else:
                     print('Something went wrong with the demultiplexing and ' +
                           'the file\n' + fq_out + '\ncould not be created.  ' +
