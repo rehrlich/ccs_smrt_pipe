@@ -20,8 +20,8 @@ The order of the barcodes in this file doesn't matter.  Extra barcodes are also 
 
 
 Command line mode:
-This is intended to be used for debugging and testing parameters in a bash loop.  You should generally use the multi sample mode because it is more efficient when you have multiple samples per cell.
-This takes several command line inputs (described below) and runs a SMRT pipe circular consensus sequencing (ccs) job to create a consensus fastq file.
+This is intended to be used for debugging and testing parameters in a bash loop.  You should generally use the multi sample mode because it is more efficient when you have multiple jobs.
+This takes several command line inputs (described below) and runs a SMRT pipe circular consensus sequencing (ccs) job to create consensus fastq files.
 
 
 Batch input mode:
@@ -86,8 +86,14 @@ SAMPLE_NAME - (batch input file only)  A name for the sample.  All names in the 
 FORWARD_BARCODE - (batch input file only)  The barcode name must be valid fasta headers from the barcode fasta file.  All barcodes for a job must be unique.
 REVERSE_BARCODE - (batch input file only)  The other barcode for the sample.
 
+
+Single sample analysis:
+This program only works with samples with barcodes.  If your samples do not have barcodes, you will need to use smrt portal or smrt pipe to do the ccs job.
+Smrt pipe requires two pairs of barcodes.  If you are only interested in one sample, you can add a second pair of barcodes to the barcode fasta file and use them to create a second sample.  These sequences should be the same length as the original barcodes.  The sequences should not be similar to the original barcodes.
+
+
 Detailed explanation of output directory:
-OUTDIR/fastq - This has the fastq output file(s).  The header lines are the headers created by smrtpipe with ';ccs=X;barcodelabel=Y;' appended to the end.  X is the number of ccs passes that were used to generate that entry in the file.  Y is the sample name.
+OUTDIR/fastq - This has the fastq output files.  The files are names are the sample names.  The header lines are the headers created by smrtpipe with ';ccs=X;barcodelabel=Y;' appended to the end.  X is the number of ccs passes that were used to generate that entry in the file.  Y is the sample name.
 OUTDIR/job_name - These directories have all of the files created by smrt pipe.
 
 
