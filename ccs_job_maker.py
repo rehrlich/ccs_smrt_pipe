@@ -83,7 +83,8 @@ def main():
                 fq_in = sample['fastq']
                 if os.path.isfile(fq_in):
                     fq_out = fq_dir + '/' + sample['name'] + '_no_ccs_count.fastq'
-                    call(['cp', fq_in, fq_out])
+                    header_suffix = 'barcodelabel=' + sample['name'] + ';'
+                    count_passes.PolymerasePasses.add_fake_counts_to_fastq(fq_in, fq_out, header_suffix)
                 else:
                     fq_out = fq_dir + '/' + sample['name'] + '.fastq'
                     print('Something went wrong with the demultiplexing and ' +

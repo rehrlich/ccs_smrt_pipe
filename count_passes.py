@@ -50,3 +50,18 @@ class PolymerasePasses:
 
         with open(out_fq, 'w') as out_file:
             out_file.write(''.join(counted_fq))
+
+    @staticmethod
+    def add_fake_counts_to_fastq(in_fq, out_fq, header_suffix=''):
+        counted_fq = list()
+        with open(in_fq, 'r') as in_file:
+            for i, line in enumerate(in_file):
+                if i % 4 == 0:
+                    name = line[1:].split()[0]
+                    counted_fq.append('@' + name + ';ccs=NA;' +
+                                      header_suffix + '\n')
+                else:
+                    counted_fq.append(line)
+
+        with open(out_fq, 'w') as out_file:
+            out_file.write(''.join(counted_fq))
