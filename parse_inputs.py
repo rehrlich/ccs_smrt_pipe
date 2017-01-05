@@ -4,6 +4,7 @@
 import argparse
 import os
 import sys
+import string
 from itertools import groupby
 
 sample_specific_parameters = {'sample_name', 'forward_barcode',
@@ -82,6 +83,15 @@ def make_paths_absolute(parameters):
         else:
             abs_parameters[parameter] = value
     return abs_parameters
+
+
+def check_paths_for_spaces(parameters):
+    for parameter, value in parameters.items():
+        if parameter in path_parameters:
+            for char in value:
+                if char in string.whitespace:
+                    sys.exit('Error:  The value for ' + parameter +
+                             ' cannot include any whitespace characters.')
 
 
 def group_by(unsorted_iterable, key_func):
@@ -169,6 +179,8 @@ def group_by_job(input_file):
                             'barcode1': sample[col_numbers['forward_barcode']],
                             'barcode2': sample[col_numbers['reverse_barcode']]})
         parameters = make_paths_absolute(parameters)
+        check_paths_for_spaces(parameters)
+
         check_sample_names(samples)
         jobs.append({'samples': samples, 'parameters': parameters})
 
@@ -201,6 +213,7 @@ def organize_single_job_inputs(args):
 
     parameters = {param: args[param] for param in general_parameters}
     parameters = make_paths_absolute(parameters)
+    check_paths_for_spaces(parameters)
 
     return [{'samples': samples, 'parameters': parameters}]
 

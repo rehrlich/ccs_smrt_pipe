@@ -75,13 +75,13 @@ Required arguments:
 
 
 Detailed explanation of arguments:
-OUTDIR - This is a path to a directory that does not currently exist.  The default option is to create a directory called smrt_pipe_ccs in your current directory.
+OUTDIR - This is a path to a directory that does not currently exist.  The default option is to create a directory called smrt_pipe_ccs in your current directory.  This argument cannot include whitespace.
 JOB_NAME - A nickname for the analysis.
 FULL_PASSES - PacBio describes this as "The minimum number of full-length passes over the insert DNA for the read to be included."  It must be a whole number between zero and ten, inclusive.
 PRED_ACCURACY - PacBio describes this as "The minimum predicted accuracy (in %) of the Reads of Insert emitted."  It must be a whole number between 70 and 100, inclusive.
-BARCODE_FILE - This is the path to a fasta file with the barcodes used for the experiment.
-VIDEO_PATH - A directory containing the *.bax.h5 data files.  In the directory with the raw data from a pacbio cell, this the Analysis_Results folder.  All *.bax.h5 files in the directory will be used.  On my computer this path would be something like /data/pacbio/rawdata/run_name/A01_1/Analysis_Results
-SAMPLE_NAME FBARCODE RBARCODE - (command line only)  You must use the -s flag at least twice.  The flag must be followed by a space separated list of three values:  sample name, forward barcode, and reverse barcode.  The sample name is a nickname for the sample.  The barcode names must be valid fasta headers from the barcode fasta file.  All values must be unique.  This means if you ues the -s flag three times, you must use three different sample names and six different barcode names.  Sample names cannot end with '_no_ccs_count', and 'all_samples' is not a valid sample name.
+BARCODE_FILE - This is the path to a fasta file with the barcodes used for the experiment.  This argument cannot include whitespace.
+VIDEO_PATH - A directory containing the *.bax.h5 data files.  In the directory with the raw data from a pacbio cell, this the Analysis_Results folder.  All *.bax.h5 files in the directory will be used.  On my computer this path would be something like /data/pacbio/rawdata/run_name/A01_1/Analysis_Results.  This argument cannot include whitespace.
+SAMPLE_NAME FBARCODE RBARCODE - (command line only)  You must use the -s flag at least twice.  The flag must be followed by a space separated list of three values:  sample name, forward barcode, and reverse barcode.  The sample name is a nickname for the sample.  The barcode names must be valid fasta headers from the barcode fasta file.  All values must be unique.  This means if you ues the -s flag three times, you must use three different sample names and six different barcode names.  Sample names cannot end with '_no_ccs_count'.  'all_samples' is not a valid sample name.
 SAMPLE_NAME - (batch input file only)  A name for the sample.  All names in the file must be unique.  Sample names cannot end with '_no_ccs_count', and 'all_samples' is not a valid sample name.  This will be use to name the final fastq file.
 FORWARD_BARCODE - (batch input file only)  The barcode name must be valid fasta headers from the barcode fasta file.  All barcodes for a job must be unique.
 REVERSE_BARCODE - (batch input file only)  The other barcode for the sample.
