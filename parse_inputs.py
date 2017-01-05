@@ -37,9 +37,6 @@ def make_args():
     single_parser.add_argument('-j', '--job_name',
                                help='a name for the smrt pipe job',
                                default='smrt_pipe_job')
-    # single_parser.add_argument('-n', '--name',
-    #                            help='A name for the fastq output file',
-    #                            default='Sample1')
     single_parser.add_argument('-fp', '--full_passes',
                                help='The minimum number of full passes which must be an integer between zero and ten',
                                type=int,
@@ -65,12 +62,6 @@ def make_args():
                                 action='append',
                                 metavar=('SAMPLE_NAME', 'FBARCODE', 'RBARCODE'),
                                 required=True)
-    # required_flags.add_argument('-b1', '--barcode1',
-    #                             help='The forward barcode name',
-    #                             required=True)
-    # required_flags.add_argument('-b2', '--barcode2',
-    #                             help='The reverse barcode name',
-    #                             required=True)
 
     return parser.parse_args()
 

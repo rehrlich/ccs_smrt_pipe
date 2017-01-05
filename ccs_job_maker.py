@@ -5,6 +5,7 @@ import os
 import traceback
 from subprocess import call
 from glob import glob
+import sys
 
 import parse_inputs
 import make_barcode_ref
@@ -35,7 +36,7 @@ class CCSJob:
             video_dir=parameters['video_path'],
             job_dir=self.job_dir)
 
-        self.ccs_h5_files = glob(self.job_dir + '/data/*.ccs.h5')
+        self.ccs_h5_files = list()
 
     def run(self):
         call(['bash', 'smrt_pipe_job.sh', self.job_dir,
@@ -62,12 +63,14 @@ def main():
         jobs = parse_inputs.organize_single_job_inputs(args)
 
     project_dir = jobs[0]['parameters']['outdir']
+    if os.path.isdir(project_dir):
+        sys.exit('Error:  The outdir ' + project_dir + ' already exists.')
     fq_dir = project_dir + '/fastq'
 
     jobs = [CCSJob(job['parameters'], job['samples']) for job in jobs]
 
-    # for job in jobs:
-    #     job.run()
+    for job in jobs:
+        job.run()
 
     call(['mkdir', fq_dir])
 
